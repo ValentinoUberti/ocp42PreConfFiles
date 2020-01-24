@@ -1,0 +1,20 @@
+
+firewall-cmd --permanent --add-service=ftp
+firewall-cmd --permanent --add-service=dhcp
+firewall-cmd --permanent --add-service=dns
+firewall-cmd --permanent --add-port=69/udp
+firewall-cmd --permanent --add-port=69/tcp
+firewall-cmd --permanent --add-port=4011/udp
+firewall-cmd --permanent --add-port=4011/tcp
+firewall-cmd --permanent --add-port=68/udp
+firewall-cmd --permanent --add-port=68/tcp
+
+
+#eth0  External
+#eth1  Internal
+
+firewall-cmd --direct --add-rule ipv4 nat POSTROUTING 0 -o eth0 -j MASQUERADE --permanent
+firewall-cmd --direct --add-rule ipv4 filter FORWARD 0 -i eth1 -o eth0 -j ACCEPT --permanent
+firewall-cmd --direct --add-rule ipv4 filter FORWARD 0 -i eth0 -o eth1 -m state --state RELATED,ESTABLISHED -j ACCEPT --permanent
+firewall-cmd --reload
+
