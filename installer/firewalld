@@ -1,20 +1,26 @@
+nmcli con mod eth0 connection.zone external
+nmcli con mod eth1 connection.zone internal
 
-firewall-cmd --permanent --add-service=ftp
-firewall-cmd --permanent --add-service=dhcp
-firewall-cmd --permanent --add-service=dns
-firewall-cmd --permanent --add-port=69/udp
-firewall-cmd --permanent --add-port=69/tcp
-firewall-cmd --permanent --add-port=4011/udp
-firewall-cmd --permanent --add-port=4011/tcp
-firewall-cmd --permanent --add-port=68/udp
-firewall-cmd --permanent --add-port=68/tcp
-
-
-#eth0  External
-#eth1  Internal
-
-firewall-cmd --direct --add-rule ipv4 nat POSTROUTING 0 -o eth0 -j MASQUERADE --permanent
-firewall-cmd --direct --add-rule ipv4 filter FORWARD 0 -i eth1 -o eth0 -j ACCEPT --permanent
-firewall-cmd --direct --add-rule ipv4 filter FORWARD 0 -i eth0 -o eth1 -m state --state RELATED,ESTABLISHED -j ACCEPT --permanent
+firewall-cmd --zone=external --add-masquerade --permanent
 firewall-cmd --reload
 
+firewall-cmd --zone=internal --add-masquerade --permanent
+firewall-cmd --reload
+
+
+Configure that outgoing packets through the Server from Internal network are allowed and forwarded to External side.
+
+firewall-cmd --direct --permanent --add-rule ipv4 nat POSTROUTING 0 -o eth0 -j MASQUERADE
+firewall-cmd --direct --permanent --add-rule ipv4 filter FORWARD 0 -i eth1 -o eth0 -j ACCEPT
+firewall-cmd --direct --permanent --add-rule ipv4 filter FORWARD 0 -i eth0 -o eth1 -m state --state RELATED,ESTABLISHED -j ACCEPT
+
+
+firewall-cmd --permanent --add-service=ftp --zone=internal
+firewall-cmd --permanent --add-service=dhcp --zone=internal
+firewall-cmd --permanent --add-service=dns --zone=internal
+firewall-cmd --permanent --add-port=69/udp --zone=internal
+firewall-cmd --permanent --add-port=69/tcp --zone=internal
+firewall-cmd --permanent --add-port=4011/udp --zone=internal
+firewall-cmd --permanent --add-port=4011/tcp --zone=internal
+firewall-cmd --permanent --add-port=68/udp --zone=internal
+firewall-cmd --permanent --add-port=68/tcp --zone=internal
